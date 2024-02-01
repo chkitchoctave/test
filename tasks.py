@@ -150,5 +150,5 @@ def test(c):  # noqa: ANN001, ANN201
 def test(c):  # noqa: ANN001, ANN201
     """Run unit tests"""
     with c.prefix(venv):
-        c.run("pytest test/ck.py"):
+        c.run("pytest test/ck.py")
 
