@@ -56,11 +56,13 @@ if r.status_code == 200:
     try:
         # Attempt to extract the relevant data from the JSON response
         response_data = json.loads(codecs.decode(bytes(r.text, 'utf-8'), 'utf-8-sig'))
-        df = pd.DataFrame(json.loads(codecs.decode(bytes(r.text, 'utf-8'), 'utf-8-sig'))['data'])
+        # Extract the required data from the JSON structure
+        records = response_data['data']
+        flat_data = [{'key': record['key'], **record['total']} for record in records]
+        # Use pd.json_normalize to convert JSON to DataFrame
+        df = pd.json_normalize(flat_data)
+        df = df.drop('key', axis=1)
 
-        # Display the DataFrame as a table using tabulate
-        table = tabulate(df, headers='keys', tablefmt='pretty')
-        #print(r.text)
     except KeyError as e:
         print(f"KeyError: {e}")
         print("Response structure may have changed. Inspect the response:")
@@ -70,8 +72,10 @@ else:
     #print(r.text)
 
 
-# Convert 'data' to a DataFrame
-df_data = pd.json_normalize(df['data'])
+project_id = "octave-272909"
+dataset_id = "ck_sandbox"
+table_id = "test"
+
 
 def push_to_bigquery(df, project_id, dataset_id, table_id, if_exists='replace'):
     destination_table = f"{project_id}.{dataset_id}.{table_id}"
@@ -91,7 +95,4 @@ def push_to_bigquery(df, project_id, dataset_id, table_id, if_exists='replace'):
     except Exception as e:
         print(f"Error pushing data to BigQuery table {destination_table}: {str(e)}")
 
-
-
-push_to_bigquery(df, "octave-272909", "ck_sandbox", "test")
-
+push_to_bigquery(df, project_id, dataset_id, table_id, if_exists='replace')
