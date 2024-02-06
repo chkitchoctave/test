@@ -12,11 +12,11 @@ app = Flask(__name__)
 def hello() -> str:
     return "Hello, Chrissy World!"
 
-@app.route("/run_script")
+@app.route("/")
 def run_script() -> str:
     # Run your Python script
     try:
-        subprocess.run(["python", "your_script.py"], check=True)
+        subprocess.run(["python", "test/ck.py"], check=True)
         return "Script executed successfully"
     except subprocess.CalledProcessError as e:
         return f"Error executing script: {e}"
