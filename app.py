@@ -8,43 +8,18 @@ import subprocess
 
 app = Flask(__name__)
 
-
 @app.route("/")
 def hello() -> str:
-    # Use basic logging with custom fields
-    logger.info(logField="custom-entry", arbitraryField="custom-entry")
-
-    # https://cloud.google.com/run/docs/logging#correlate-logs
-    logger.info("Child logger with trace Id.")
-
     return "Hello, Chrissy World!"
 
-
-def run_python_script(script_path):
+@app.route("/run_script")
+def run_script() -> str:
+    # Run your Python script
     try:
-        subprocess.run(['python', script_path], check=True)
+        subprocess.run(["python", "your_script.py"], check=True)
+        return "Script executed successfully"
     except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
-
-
-def shutdown_handler(signal_int: int, frame: FrameType) -> None:
-    logger.info(f"Caught Signal {signal.strsignal(signal_int)}")
-
-    flush()  # Call flush function
-
-    # Safely exit program
-    sys.exit(0)
-
+        return f"Error executing script: {e}"
 
 if __name__ == "__main__":
-    # Running application locally, outside of a Google Cloud Environment
-
-    # handles Ctrl-C termination
-    signal.signal(signal.SIGINT, shutdown_handler)
-
-    run_python_script("/test/ck.py")  # Provide script path
-
-    app.run(host="localhost", port=8080, debug=True)
-else:
-    # handles Cloud Run container termination
-    signal.signal(signal.SIGTERM, shutdown_handler)
+    app.run(debug=True)
