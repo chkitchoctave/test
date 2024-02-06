@@ -1,17 +1,3 @@
-# Copyright 2021 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import signal
 import sys
 from types import FrameType
@@ -19,6 +5,9 @@ from types import FrameType
 from flask import Flask
 
 from utils.logging import logger
+
+# Importing pytest to run tests
+import pytest
 
 app = Flask(__name__)
 
@@ -33,6 +22,9 @@ def hello() -> str:
 
     return "Hello, Chrissy World!"
 
+def run_tests() -> None:
+    # Run tests located in test/ck.py
+    pytest.main(["test/ck.py"])
 
 def shutdown_handler(signal_int: int, frame: FrameType) -> None:
     logger.info(f"Caught Signal {signal.strsignal(signal_int)}")
@@ -50,6 +42,8 @@ if __name__ == "__main__":
 
     # handles Ctrl-C termination
     signal.signal(signal.SIGINT, shutdown_handler)
+
+    run_tests()  # Run tests before starting the Flask app
 
     app.run(host="localhost", port=8080, debug=True)
 else:
