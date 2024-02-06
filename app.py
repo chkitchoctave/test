@@ -1,13 +1,10 @@
 import signal
 import sys
 from types import FrameType
-
 from flask import Flask
+from utils.logging import logger, flush  # Import flush function
+import subprocess
 
-from utils.logging import logger
-
-# Importing pytest to run tests
-import pytest
 
 app = Flask(__name__)
 
@@ -22,16 +19,18 @@ def hello() -> str:
 
     return "Hello, Chrissy World!"
 
-def run_tests() -> None:
-    # Run tests located in test/ck.py
-    pytest.main(["test/ck.py"])
+
+def run_python_script(script_path):
+    try:
+        subprocess.run(['python', script_path], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+
 
 def shutdown_handler(signal_int: int, frame: FrameType) -> None:
     logger.info(f"Caught Signal {signal.strsignal(signal_int)}")
 
-    from utils.logging import flush
-
-    flush()
+    flush()  # Call flush function
 
     # Safely exit program
     sys.exit(0)
@@ -43,7 +42,7 @@ if __name__ == "__main__":
     # handles Ctrl-C termination
     signal.signal(signal.SIGINT, shutdown_handler)
 
-    run_tests()  # Run tests before starting the Flask app
+    run_python_script("/test/ck.py")  # Provide script path
 
     app.run(host="localhost", port=8080, debug=True)
 else:
